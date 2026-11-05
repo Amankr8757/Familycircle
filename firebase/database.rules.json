@@ -1,0 +1,82 @@
+{
+  "rules": {
+    "families": {
+      "$familyId": {
+        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
+        ".write": "auth != null && !data.exists() && newData.child('ownerUid').val() === auth.uid",
+        "ownerUid": { ".validate": "newData.isString()" },
+        "members": {
+          "$memberUid": {
+            ".read": "auth != null && (auth.uid === $memberUid || root.child('families').child($familyId).child('members').child(auth.uid).exists())",
+            ".write": "auth != null && ((auth.uid === $memberUid && ((!newData.exists() && auth.uid !== root.child('families').child($familyId).child('ownerUid').val()) || (data.exists() && newData.exists()))) || (auth.uid === root.child('families').child($familyId).child('ownerUid').val() && !data.exists() && newData.exists()))",
+            ".validate": "!newData.exists() || (newData.hasChild('name') && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 32)"
+          }
+        },
+        "locations": {
+          "$memberUid": {
+            ".write": "auth != null && auth.uid === $memberUid && root.child('families').child($familyId).child('members').child($memberUid).exists()",
+            ".validate": "!newData.exists() || (newData.hasChildren(['lat','lng','accuracy','updatedAt','battery']) && newData.child('lat').isNumber() && newData.child('lng').isNumber() && newData.child('accuracy').isNumber() && newData.child('updatedAt').isNumber() && newData.child('battery').isNumber())"
+          }
+        },
+        "safeArea": {
+          ".write": "auth != null && auth.uid === root.child('families').child($familyId).child('ownerUid').val()",
+          ".validate": "!newData.exists() || (newData.hasChildren(['name','lat','lng','radiusMeters','enabled','updatedAt','updatedBy']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 32 && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && newData.child('radiusMeters').isNumber() && newData.child('radiusMeters').val() >= 100 && newData.child('radiusMeters').val() <= 3000 && newData.child('enabled').isBoolean() && newData.child('updatedAt').isNumber() && newData.child('updatedBy').val() === auth.uid)"
+        },
+        "safeAreas": {
+          "$memberUid": {
+            ".read": "auth != null && root.child('families').child($familyId).child('members').child(auth.uid).exists()",
+            ".write": "auth != null && auth.uid === $memberUid && root.child('families').child($familyId).child('members').child($memberUid).exists()",
+            "$placeId": {
+              ".validate": "!newData.exists() || (newData.hasChildren(['name','lat','lng','radiusMeters','enabled','updatedAt','updatedBy','colorIndex']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 32 && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && newData.child('radiusMeters').isNumber() && newData.child('radiusMeters').val() >= 100 && newData.child('radiusMeters').val() <= 3000 && newData.child('enabled').isBoolean() && newData.child('updatedAt').isNumber() && newData.child('updatedBy').val() === $memberUid && newData.child('colorIndex').isNumber() && newData.child('colorIndex').val() >= 0 && newData.child('colorIndex').val() <= 2)"
+            }
+          }
+        },
+        "safeAreaEvents": {
+          "$eventId": {
+            ".write": "auth != null && !data.exists() && newData.exists() && newData.child('memberUid').val() === auth.uid && root.child('families').child($familyId).child('members').child(auth.uid).exists()",
+            ".validate": "!newData.exists() || (newData.hasChildren(['memberUid','memberName','areaName','type','timestamp']) && newData.child('memberUid').val() === auth.uid && newData.child('memberName').isString() && newData.child('memberName').val().length <= 32 && newData.child('areaName').isString() && newData.child('areaName').val().length <= 32 && (newData.child('type').val() === 'enter' || newData.child('type').val() === 'exit') && newData.child('timestamp').isNumber())"
+          }
+        },
+        "lowBatteryEvents": {
+          "$eventId": {
+            ".write": "auth != null && !data.exists() && newData.exists() && newData.child('memberUid').val() === auth.uid && root.child('families').child($familyId).child('members').child(auth.uid).exists()",
+            ".validate": "!newData.exists() || (newData.hasChildren(['memberUid','memberName','battery','timestamp']) && newData.child('memberUid').val() === auth.uid && newData.child('memberName').isString() && newData.child('memberName').val().length <= 32 && newData.child('battery').isNumber() && newData.child('battery').val() >= 0 && newData.child('battery').val() <= 5 && newData.child('timestamp').isNumber())"
+          }
+        }
+      }
+    },
+    "profilePhotos": {
+      "$familyId": {
+        ".read": "auth != null && root.child('families').child($familyId).child('members').child(auth.uid).exists()",
+        "$memberUid": {
+          ".write": "auth != null && auth.uid === $memberUid && root.child('families').child($familyId).child('members').child($memberUid).exists()",
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 135000)"
+        }
+      }
+    },
+    "joinRequests": {
+      "$familyId": {
+        ".read": "auth != null && root.child('families').child($familyId).child('ownerUid').val() === auth.uid",
+        "$requesterUid": {
+          ".write": "auth != null && ((auth.uid === $requesterUid && !data.exists() && newData.exists() && root.child('families').child($familyId).exists()) || (auth.uid === $requesterUid && !newData.exists()) || (auth.uid === root.child('families').child($familyId).child('ownerUid').val() && !newData.exists()))",
+          ".validate": "!newData.exists() || (newData.hasChildren(['name','requestedAt']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 32 && newData.child('requestedAt').isNumber())"
+        }
+      }
+    },
+    "pushTokens": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isString() && newData.val().length >= 20 && newData.val().length <= 4096"
+      }
+    },
+    "notificationPreferences": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "safeAreaAlerts": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.isBoolean()"
+        }
+      }
+    }
+  }
+}

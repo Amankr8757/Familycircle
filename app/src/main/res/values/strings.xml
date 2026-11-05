@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Family Circle</string>
+    <!-- Replace with the Realtime Database URL shown in Firebase Console. -->
+    <string name="firebase_database_url">https://familycircle-40fca-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+    <!-- Public GitHub Releases feed used for in-app update checks. -->
+    <string name="github_repository">Amankr8757/Familycircle</string>
+</resources>
+
